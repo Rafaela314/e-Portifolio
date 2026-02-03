@@ -139,9 +139,9 @@
 									<div id="contact-success" class="box" style="display: none;">
 										<p><strong>Thank you.</strong> Your message has been sent to rafa.pgcavalcante@gmail.com.</p>
 									</div>
-									<!-- Replace YOUR_FORMSPREE_ID with your Formspree form ID (get it at https://formspree.io) -->
-									<form id="contact-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
-										<input type="hidden" name="_subject" value="Contact from e-portfolio" />
+									<form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+										<input type="hidden" name="access_key" value="7f999de7-5642-49c1-b135-22581e7e3023" />
+										<input type="hidden" name="subject" value="Contact from e-portfolio" />
 										<div class="fields">
 											<div class="field half">
 												<label for="name">Name</label>
@@ -149,7 +149,7 @@
 											</div>
 											<div class="field half">
 												<label for="email">Email</label>
-												<input type="email" name="_replyto" id="email" required />
+												<input type="email" name="email" id="email" required />
 											</div>
 											<div class="field">
 												<label for="message">Message</label>
@@ -227,13 +227,16 @@
 						headers: { 'Accept': 'application/json' }
 					})
 					.then(function(response) {
-						if (response.ok) {
+						return response.json().then(function(data) { return { ok: response.ok, data: data }; }).catch(function() { return { ok: response.ok, data: {} }; });
+					})
+					.then(function(result) {
+						if (result.ok && result.data && result.data.success) {
 							form.style.display = 'none';
 							successEl.style.display = 'block';
 						} else {
 							submitBtn.disabled = false;
 							submitBtn.textContent = originalText;
-							alert('Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
+							alert(result.data && result.data.message ? result.data.message : 'Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
 						}
 					})
 					.catch(function() {
