@@ -136,7 +136,7 @@
 					<section id="contact">
 						<div class="inner">
 							<section>
-								<form method="post" action="#">
+								<form id="contact-form" method="get" action="mailto:rafa.pgcavalcante@gmail.com" enctype="text/plain">
 									<div class="fields">
 										<div class="field half">
 											<label for="name">Name</label>
@@ -144,7 +144,7 @@
 										</div>
 										<div class="field half">
 											<label for="email">Email</label>
-											<input type="text" name="email" id="email" />
+											<input type="email" name="email" id="email" />
 										</div>
 										<div class="field">
 											<label for="message">Message</label>
@@ -162,23 +162,22 @@
 									<div class="contact-method">
 										<span class="icon solid alt fa-envelope"></span>
 										<h3>Email</h3>
-										<a href="#">information@untitled.tld</a>
+										<a href="#">rafa.pgcavalcante@gmail.com</a>
 									</div>
 								</section>
 								<section>
 									<div class="contact-method">
 										<span class="icon solid alt fa-phone"></span>
 										<h3>Phone</h3>
-										<span>(000) 000-0000 x12387</span>
+										<span>+34 623 920 428 (ES)</span>
 									</div>
 								</section>
 								<section>
 									<div class="contact-method">
 										<span class="icon solid alt fa-home"></span>
 										<h3>Address</h3>
-										<span>1234 Somewhere Road #5432<br />
-										Nashville, TN 00000<br />
-										United States of America</span>
+										<span>15173 Oleiros<br />
+											A Coruña, Spain</span>
 									</div>
 								</section>
 							</section>
@@ -211,6 +210,17 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script>
+				document.getElementById('contact-form').addEventListener('submit', function(e) {
+					e.preventDefault();
+					var name = document.getElementById('name').value || '';
+					var email = document.getElementById('email').value || '';
+					var message = document.getElementById('message').value || '';
+					var subject = 'Contact from e-portfolio';
+					var body = 'From: ' + name + '\nEmail: ' + email + '\n\nMessage:\n' + message;
+					window.location.href = 'mailto:rafa.pgcavalcante@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+				});
+			</script>
 
 	</body>
 </html>
