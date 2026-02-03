@@ -135,25 +135,32 @@
 				<!-- Contact -->
 					<section id="contact">
 						<div class="inner">
-							<section id="contact-form">
-									<div class="fields">
-										<div class="field half">
-											<label for="name">Name</label>
-											<input type="text" id="name" placeholder="Your name" />
-										</div>
-										<div class="field half">
-											<label for="email">Email</label>
-											<input type="email" id="email" placeholder="your@email.com" />
-										</div>
-										<div class="field">
-											<label for="message">Message</label>
-											<textarea id="message" rows="6" placeholder="Your message"></textarea>
-										</div>
+							<section>
+									<div id="contact-success" class="box" style="display: none;">
+										<p><strong>Thank you.</strong> Your message has been sent to rafa.pgcavalcante@gmail.com.</p>
 									</div>
-									<ul class="actions">
-										<li><button type="button" id="send-message-btn" class="primary">Send Message</button></li>
-										<li><button type="button" id="clear-contact-btn" class="button">Clear</button></li>
-									</ul>
+									<!-- Replace YOUR_FORMSPREE_ID with your Formspree form ID (get it at https://formspree.io) -->
+									<form id="contact-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+										<input type="hidden" name="_subject" value="Contact from e-portfolio" />
+										<div class="fields">
+											<div class="field half">
+												<label for="name">Name</label>
+												<input type="text" name="name" id="name" required />
+											</div>
+											<div class="field half">
+												<label for="email">Email</label>
+												<input type="email" name="_replyto" id="email" required />
+											</div>
+											<div class="field">
+												<label for="message">Message</label>
+												<textarea name="message" id="message" rows="6" required></textarea>
+											</div>
+										</div>
+										<ul class="actions">
+											<li><button type="submit" class="primary">Send Message</button></li>
+											<li><button type="reset" class="button">Clear</button></li>
+										</ul>
+									</form>
 								</section>
 							<section class="split">
 								<section>
@@ -206,18 +213,34 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script>
-				document.getElementById('send-message-btn').addEventListener('click', function() {
-					var name = document.getElementById('name').value || '';
-					var email = document.getElementById('email').value || '';
-					var message = document.getElementById('message').value || '';
-					var subject = 'Contact from e-portfolio';
-					var body = 'From: ' + name + '\nEmail: ' + email + '\n\nMessage:\n' + message;
-					window.location.href = 'mailto:rafa.pgcavalcante@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-				});
-				document.getElementById('clear-contact-btn').addEventListener('click', function() {
-					document.getElementById('name').value = '';
-					document.getElementById('email').value = '';
-					document.getElementById('message').value = '';
+				document.getElementById('contact-form').addEventListener('submit', function(e) {
+					e.preventDefault();
+					var form = this;
+					var successEl = document.getElementById('contact-success');
+					var submitBtn = form.querySelector('button[type="submit"]');
+					var originalText = submitBtn.textContent;
+					submitBtn.disabled = true;
+					submitBtn.textContent = 'Sending…';
+					fetch(form.action, {
+						method: 'POST',
+						body: new FormData(form),
+						headers: { 'Accept': 'application/json' }
+					})
+					.then(function(response) {
+						if (response.ok) {
+							form.style.display = 'none';
+							successEl.style.display = 'block';
+						} else {
+							submitBtn.disabled = false;
+							submitBtn.textContent = originalText;
+							alert('Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
+						}
+					})
+					.catch(function() {
+						submitBtn.disabled = false;
+						submitBtn.textContent = originalText;
+						alert('Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
+					});
 				});
 			</script>
 
