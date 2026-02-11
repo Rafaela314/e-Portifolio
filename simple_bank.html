@@ -144,6 +144,50 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script>
+				document.getElementById('contact-form').addEventListener('submit', function (e) {
+				  e.preventDefault();
+				  var form = this;
+				  var successEl = document.getElementById('contact-success');
+				  var submitBtn = form.querySelector('button[type="submit"]');
+				  var originalText = submitBtn.textContent;
+			  
+				  submitBtn.disabled = true;
+				  submitBtn.textContent = 'Sending…';
+			  
+				  fetch(form.action, {
+					method: 'POST',
+					body: new FormData(form),
+					headers: { 'Accept': 'application/json' }
+				  })
+					.then(function (response) {
+					  return response.json()
+						.then(function (data) { return { ok: response.ok, data: data }; })
+						.catch(function () { return { ok: response.ok, data: {} }; });
+					})
+					.then(function (result) {
+					  if (result.ok && result.data && result.data.success) {
+						form.style.display = 'none';
+						successEl.style.display = 'block';
+					  } else {
+						submitBtn.disabled = false;
+						submitBtn.textContent = originalText;
+						var msg = (result.data && result.data.message)
+						  ? result.data.message
+						  : 'The form could not be sent.';
+						alert(msg + ' Please try again or email rafa.pgcavalcante@gmail.com directly.');
+					  }
+					})
+					.catch(function () {
+					  submitBtn.disabled = false;
+					  submitBtn.textContent = originalText;
+					  var hint = (window.location.protocol === 'file:' || window.location.hostname === '')
+						? ' The contact form only works when the site is served over the web (e.g. GitHub Pages), not when you open the HTML file directly.'
+						: '';
+					  alert('Request failed.' + hint + ' Please try again or email rafa.pgcavalcante@gmail.com directly.');
+					});
+				});
+			  </script>
 
 	</body>
 </html>
