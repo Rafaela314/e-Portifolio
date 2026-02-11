@@ -66,8 +66,11 @@
 										<img src="images/pic01.jpg" alt="" />
 									</span>
 									<header class="major">
-										<h3><a href="landing.html" class="link">Aliquam</a></h3>
-										<p>Ipsum dolor sit amet</p>
+										<h3><a href="landing.html" class="link">Simple bank</a></h3>
+										<p> A minimal REST API for a banking-style application built in Go. This project demonstrates core backend skills: database design, SQL code generation, HTTP APIs, transactions, and testing.<br>
+											<a href="https://github.com/Rafaela314/simple-bank" target="_blank" rel="noopener noreferrer">GitHub Repository</a></p>
+											<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+										</head></p>
 									</header>
 								</article>
 								<article>
@@ -236,13 +239,17 @@
 						} else {
 							submitBtn.disabled = false;
 							submitBtn.textContent = originalText;
-							alert(result.data && result.data.message ? result.data.message : 'Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
+							var msg = (result.data && result.data.message) ? result.data.message : 'The form could not be sent.';
+							alert(msg + ' Please try again or email rafa.pgcavalcante@gmail.com directly.');
 						}
 					})
-					.catch(function() {
+					.catch(function(err) {
 						submitBtn.disabled = false;
 						submitBtn.textContent = originalText;
-						alert('Something went wrong. Please try again or email rafa.pgcavalcante@gmail.com directly.');
+						var hint = (window.location.protocol === 'file:' || window.location.hostname === '') 
+							? ' The contact form only works when the site is served over the web (e.g. GitHub Pages), not when you open the HTML file directly.'
+							: '';
+						alert('Request failed.' + hint + ' Please try again or email rafa.pgcavalcante@gmail.com directly.');
 					});
 				});
 			</script>
