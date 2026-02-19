@@ -50,9 +50,57 @@
 									</header>
 									<span class="image main"><img src="images/stock.png" alt="" style="width: 100%; max-height: 180px; object-fit: cover;"/></span>
 									<!--<span class="image main"><img src="images/pic11.jpg" alt="" /></span>-->
-									<p>main stack: golang with gin framework for request handling. Testify and mockery for test coverage.</p>
-									<p>database: Postgres with SQLC for SQL code generation. </p>
-									<p>Deployment: Docker and Kubernetes.</p>
+									<h2 style="font-size: 1.35em; font-weight: 700; margin-bottom: 0.5em;">Overview</h2>
+									<p>The system exposes HTTP APIs for user registration, account management, and transfers between accounts. It uses a PostgreSQL database with versioned migrations, a pgx connection pool, and sqlc-generated, type-safe data access. Business rules (e.g. transfers) run inside database transactions with explicit deadlock avoidance. User passwords are hashed with Argon2id; API and store layers are tested with gomock and a generated mock store.</p>
+									<h2 style="font-size: 1.35em; font-weight: 700; margin-bottom: 0.5em;">Architecture & Technical Implementation</h2>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">API layer</h3>
+									<p>Gin for routing, request binding (JSON, query, URI), and validation (struct tags and a custom currency validator). Handlers return structured JSON and appropriate HTTP status codes (400, 403, 404, 500). Configuration is loaded from environment (e.g. app.env) via Viper.</p>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">Data layer</h3>
+									<p>sqlc generates Go code from SQL under db/query/, producing a Querier and a Store interface implemented by a concrete SQLStore that wraps a pgxpool and runs transactional workflows (e.g. TransferTx). Migrations are managed with golang-migrate (up/down, including single-step rollback).</p>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">Domain model</h3>
+									<p>Normalized schema: users (username, hashed password, full name, email), accounts (owner → user, balance, currency) with a unique constraint per owner per currency, entries (account, amount), and transfers (from/to account, amount). Foreign keys and indexes are defined in migration files.</p>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">Business logic</h3>
+									<p>Transfers are implemented as a single transaction: create transfer record, create debit and credit entries, and update both account balances. Updates are applied in a consistent order by account ID to avoid deadlocks under concurrent A↔B transfers.</p>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">Security</h3>
+									<p>User passwords are hashed with Argon2id: per-user salt, configurable cost, and constant-time comparison in verification. The API does not return password hashes; constraint violations (e.g. duplicate username) are mapped to 403 with clear error responses.</p>
+
+									<h2 style="font-size: 1.35em; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em;">Testing Strategy</h2>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">Store and DB</h3>
+									<p>Table-driven tests cover CRUD and list operations for accounts, entries, and transfers. A shared test DB and transactional rollback per test keep data isolated. Dedicated tests run concurrent transfers and bidirectional transfers to validate balance consistency and deadlock avoidance.</p>
+									<h3 style="font-size: 1.1em; font-weight: 700; margin-top: 1em; margin-bottom: 0.25em; color: inherit;">API handlers</h3>
+									<p>Handler tests use a mock store generated with mockgen from the Store interface. Scenarios include success, not found, internal error, and invalid input (e.g. invalid ID), with no real database dependency.</p>
+
+									<h2 style="font-size: 1.35em; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em;">Technology Stack</h2>
+									<div class="table-wrapper">
+										<table style="width: 100%; border-collapse: collapse;">
+											<thead>
+												<tr style="border-bottom: 2px solid;">
+													<th style="text-align: left; padding: 0.5em 0.75em; font-weight: 700;">Layer</th>
+													<th style="text-align: left; padding: 0.5em 0.75em; font-weight: 700;">Technologies</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Language</td><td style="padding: 0.5em 0.75em;">Go 1.23+</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">HTTP</td><td style="padding: 0.5em 0.75em;">Gin</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Database</td><td style="padding: 0.5em 0.75em;">PostgreSQL</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Driver / pool</td><td style="padding: 0.5em 0.75em;">pgx v5</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">SQL codegen</td><td style="padding: 0.5em 0.75em;">sqlc</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Migrations</td><td style="padding: 0.5em 0.75em;">golang-migrate</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Config</td><td style="padding: 0.5em 0.75em;">Viper</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Password hashing</td><td style="padding: 0.5em 0.75em;">Argon2id (golang.org/x/crypto/argon2)</td></tr>
+												<tr style="border-bottom: 1px solid rgba(128,128,128,0.3);"><td style="padding: 0.5em 0.75em;">Testing</td><td style="padding: 0.5em 0.75em;">testing, testify, gomock, mockgen</td></tr>
+											</tbody>
+										</table>
+									</div>
+
+									<h2 style="font-size: 1.35em; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em;">Deliverables & Outcomes</h2>
+									<ul style="margin: 0.5em 0 0 1.25em; padding-left: 0.5em;">
+										<li style="margin-bottom: 0.5em;">REST API for users (POST /users), accounts (POST/GET, list with pagination), and transfers (POST /transfers) with validation and consistent error handling.</li>
+										<li style="margin-bottom: 0.5em;">Transactional transfer flow with deadlock-safe update ordering and tests that stress concurrency.</li>
+										<li style="margin-bottom: 0.5em;">Secure password handling via Argon2id and constant-time verification.</li>
+										<li style="margin-bottom: 0.5em;">Maintainable data access through sqlc-generated code and a single Store interface, with mock generation for fast, isolated API tests.</li>
+										<li style="margin-bottom: 0.5em;">Operational tooling via a Makefile (Postgres, migrations, sqlc, tests, server, mock generation) and env-based configuration.</li>
+									</ul>
 								</div>
 							</section>
 
