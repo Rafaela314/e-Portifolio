@@ -36,3 +36,7 @@
 ehthumbs.db
 Thumbs.db
 
+# Template source (kept local only) #
+#####################################
+html5up-forty/
+
